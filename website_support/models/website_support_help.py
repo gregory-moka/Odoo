@@ -47,6 +47,8 @@ class WebsiteSupportHelpPage(models.Model):
     feedback_ids = fields.One2many('website.support.help.page.feedback', 'hp_id', string="Feedback")
     feedback_average = fields.Float(string="Feedback Average Rating", compute="_compute_feedback_average")
     feedback_count = fields.Integer(string="Feedback Count", compute="_compute_feedback_count")
+    image = fields.Binary(string='Image')
+
 
     @api.one
     @api.depends('feedback_ids')

@@ -317,16 +317,23 @@ class SupportTicketController(http.Controller):
     @http.route('/support/help/<model("website.support.help.group"):help_group>', type='http', auth="public", website=True)
     def help_group(self, help_group):
         """Displays help group template"""
-        if help_group.website_published:
-            return http.request.render("website_support.help_group", {'help_group':help_group})
-        else:
-            return request.render('website.404')
+
+        return http.request.render("website_support.help_group", {'help_group':help_group})
 
     @http.route(['''/support/help/<model("website.support.help.group"):help_group>/<model("website.support.help.page", "[('group_id','=',help_group[0])]"):help_page>'''], type='http', auth="public", website=True)
     def help_page(self, help_group, help_page, enable_editor=None, **post):
         """Displays help page template"""
-        if help_group.website_published and help_page.website_published and request.env.user in help_group.sudo().group_ids.users:
-            return http.request.render("website_support.help_page", {'help_page':help_page})
+
+        #List if groups where the user has access
+        permission_list = []
+        for perm_group in request.env.user.groups_id:
+            permission_list.append(perm_group.id)
+
+        help_groups = http.request.env['website.support.help.group'].sudo().search(['|', ('group_ids', '=', False ), ('group_ids', 'in', permission_list), ('website_published','=',True)])
+
+
+        if help_group.website_published and help_page.website_published:
+            return http.request.render("website_support.help_page", {'help_page':help_page, 'help_group': help_group, 'help_groups': help_groups})
         else:
             return request.render('website.404')
 
